@@ -1,8 +1,11 @@
 import argparse
+from time import time
+import json
+import math
 
 DAY = 1
 
-PUZZLE = '''
+PUZZLE_TEXT = '''
 https://adventofcode.com/2022/day/1
 
 --- Day 1: Calorie Counting ---
@@ -63,7 +66,7 @@ Calories. In the example above, this is 24000 (carried by the fourth Elf).
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 '''
 
-SAMPLE = '''
+SAMPLE_INPUT = '''
 1000
 2000
 3000
@@ -80,19 +83,111 @@ SAMPLE = '''
 10000
 '''
 
-SAMPLE_SOLUTION = 24000
+P1_SAMPLE_SOLUTION = 24000
+
+P2_SAMPLE_SOLUTION = 45000
+
+def elapsed_time(start_time):
+    return f"{round(time() - start_time, 8)}s\n"
+
+def part_one(input_text=SAMPLE_INPUT):
+    input_list = input_text.lstrip().rstrip().split('\n')
+    
+    calories_per_elf = { }
+    
+    calories = 0
+    highest_calorie_count = {"elf": 0, "calories": 0}
+    for row in input_list:
+        try:
+            calories += int(row)
+        except ValueError:
+            calories_per_elf[len(calories_per_elf)] = calories
+            if calories > highest_calorie_count["calories"]:
+                highest_calorie_count = {"elf": len(calories_per_elf), "calories": calories}
+            calories = 0
+    
+    return int(highest_calorie_count["calories"])
+
+def part_two(input_text=SAMPLE_INPUT):
+    input_list = input_text.lstrip().rstrip().split('\n')
+    
+    calories_per_elf = []
+    calories = 0
+    for row in input_list:
+        try:
+            calories += int(row)
+        except ValueError:
+            calories_per_elf.append(calories)
+            calories = 0
+    
+    calories_per_elf.append(calories)
+    
+    calories_per_elf.sort()
+    
+    top_three = calories_per_elf.pop() + calories_per_elf.pop() + calories_per_elf.pop()
+    
+    return top_three
+        
 
 def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
-    parser.add_argument("input", type=str, help="Puzzle Input")
+    parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
+    parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
+    parser.add_argument("-t", "--testsample", help="Test Sample Input", action='store_true')
+    parser.add_argument("-i", "--inputfile", help="Puzzle Input", type=str)
     args = parser.parse_args()
     
-    try:
-        file = open(args.input, 'r')
-    except FileNotFoundError:
-        print("File not found.")
-        quit()
+    if args.showpuzzle:
+        print(f"###############\nAOC 2022 DAY {DAY} PUZZLE TEXT\n###############")
+        print(PUZZLE_TEXT)
     
+    if args.showsample:
+        print(f"###############\nAOC 2022 DAY {DAY} SAMPLE INPUT\n###############")
+        print(SAMPLE_INPUT.lstrip())
+        print(f"\n###############\nAOC 2022 DAY {DAY} P1 SAMPLE SOLUTION\n###############")
+        print(P1_SAMPLE_SOLUTION)
+        print(f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############")
+        print(P2_SAMPLE_SOLUTION)
+    
+    if args.inputfile:        
+        try:
+            my_input = ""
+            with open(args.inputfile, 'r') as file:
+                while (line := file.readline()):
+                    my_input += line            
+        except FileNotFoundError:
+            print("Specified input file not found.")
+            quit()
 
+    if P1_SAMPLE_SOLUTION:            
+        print("PART 1\nTesting Sample...\n")
+        start_time = time()
+        solution_output = part_one()
+        if P1_SAMPLE_SOLUTION == solution_output:
+            print("Sample correct.")
+        else:
+            print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {solution_output}")
+        print(f"Elapsed time {elapsed_time(start_time)}")
+        if args.inputfile:
+            print("Processing Input...\n")
+            start_time = time()
+            print(f'SOLUTION: {part_one(my_input)}')
+            print(f"Elapsed time {elapsed_time(start_time)}")
+        
+    if P2_SAMPLE_SOLUTION:
+        print("PART 2\nTesting Sample...\n")
+        start_time = time()
+        solution_output = part_two()
+        if P2_SAMPLE_SOLUTION == solution_output:
+            print("Sample correct.")
+        else:
+            print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {solution_output}")
+        print(f"Elapsed time {elapsed_time(start_time)}")
+        if args.inputfile:
+            print("Processing Input...\n")
+            start_time = time()
+            print(f'SOLUTION: {part_two(my_input)}')
+            print(f"Elapsed time {elapsed_time(start_time)}")
+            
 if __name__ == "__main__":
     main()
