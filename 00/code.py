@@ -68,7 +68,7 @@ def main():
         else:
             print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {solution_output}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if args.inputfile():
+        if args.inputfile:
             print("Processing Input...\n")
             start_time = time()
             print(f'SOLUTION: {part_one(my_input)}')
@@ -83,7 +83,7 @@ def main():
         else:
             print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {solution_output}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if args.inputfile():
+        if args.inputfile:
             print("Processing Input...\n")
             start_time = time()
             print(f'SOLUTION: {part_two(my_input)}')
