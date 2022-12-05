@@ -24,7 +24,7 @@ def part_one(input_text=SAMPLE_INPUT):
     return 
 
 def part_two(input_text=SAMPLE_INPUT):
-    input_list = input_text.lstrip().rstrip().split('\n')
+    input_list = input_text.strip().split('\n')
         
     return
         
@@ -33,7 +33,6 @@ def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
     parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
     parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
-    parser.add_argument("-t", "--testsample", help="Test Sample Input", action='store_true')
     parser.add_argument("-i", "--inputfile", help="Puzzle Input", type=str)
     args = parser.parse_args()
     
@@ -43,7 +42,7 @@ def main():
     
     if args.showsample:
         print(f"###############\nAOC 2022 DAY {DAY} SAMPLE INPUT\n###############")
-        print(SAMPLE_INPUT.lstrip())
+        print(SAMPLE_INPUT.strip())
         print(f"\n###############\nAOC 2022 DAY {DAY} P1 SAMPLE SOLUTION\n###############")
         print(P1_SAMPLE_SOLUTION)
         print(f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############")

@@ -102,7 +102,6 @@ def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
     parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
     parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
-    parser.add_argument("-t", "--testsample", help="Test Sample Input", action='store_true')
     parser.add_argument("-i", "--inputfile", help="Puzzle Input", type=str)
     args = parser.parse_args()
     
