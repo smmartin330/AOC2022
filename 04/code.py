@@ -7,6 +7,7 @@ DAY = 4
 
 PUZZLE_TEXT = '''
 --- Day 4: Camp Cleanup ---
+--- Part One ---
 
 Space needs to be cleared before the last supplies can be unloaded from the ships, and so several Elves have been 
 assigned the job of cleaning up sections of the camp. Every section has a unique ID number, and each Elf is 
@@ -59,6 +60,23 @@ in the pair would be exclusively cleaning sections their partner will already be
 most in need of reconsideration. In this example, there are 2 such pairs.
 
 In how many assignment pairs does one range fully contain the other?
+
+---Part Two---
+--- Part Two ---
+
+It seems like there is still quite a bit of duplicate work planned. 
+Instead, the Elves would like to know the number of pairs that overlap at all.
+
+In the above example, the first two pairs (2-4,6-8 and 2-3,4-5) don't 
+overlap, while the remaining four pairs (5-7,7-9, 2-8,3-7, 6-6,4-6, and 2-6,4-8) do overlap:
+
+5-7,7-9 overlaps in a single section, 7.
+2-8,3-7 overlaps all of the sections 3 through 7.
+6-6,4-6 overlaps in a single section, 6.
+2-6,4-8 overlaps in sections 4, 5, and 6.
+So, in this example, the number of overlapping assignment pairs is 4.
+
+In how many assignment pairs do the ranges overlap?
 '''
 
 SAMPLE_INPUT = '''
@@ -74,7 +92,7 @@ P1_SAMPLE_SOLUTION = 2
 
 P2_SAMPLE_SOLUTION = 4
 
-class PAIR():
+class Pair():
     def __init__(self,pair):
         self.pair = pair.split(',') # [ '2-8', '3-7' ]
         self.first = [ int(item) for item in self.pair[0].split('-') ] # [ '2', '8' ]
@@ -91,7 +109,7 @@ def part_one(input_text=SAMPLE_INPUT):
     pairs = list()
     overlap_count = 0
     for row in input_list:
-        pairs.append(PAIR(row))
+        pairs.append(Pair(row))
         overlap_count += int(pairs[-1].assignments_overlap_completely)
     
     return overlap_count
@@ -102,7 +120,7 @@ def part_two(input_text=SAMPLE_INPUT):
     pairs = list()
     overlap_count = 0
     for row in input_list:
-        pairs.append(PAIR(row))
+        pairs.append(Pair(row))
         overlap_count += int(pairs[-1].assignments_overlap_partially)
     
     return overlap_count 

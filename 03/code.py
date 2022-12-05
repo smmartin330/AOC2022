@@ -102,7 +102,7 @@ P2_SAMPLE_SOLUTION = 70
 
 PRIORITIES = [ None, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ]
 
-class RUCKSACK():
+class Rucksack():
     def __init__(self,contents):
         self.contents = [ contents[0:len(contents)//2], contents[len(contents)//2:len(contents)] ]
         self.both = { item for item in self.contents[0] if item in self.contents[1] }
@@ -111,7 +111,7 @@ class RUCKSACK():
         for item in self.both:
             self.priority_both += PRIORITIES.index(item)
 
-class GROUP():
+class Group():
     def __init__(self,rucksacks):
         self.rucksacks = rucksacks
         self.all_carried_items = set()
@@ -127,7 +127,7 @@ def part_one(input_text=SAMPLE_INPUT):
     rucksacks = [ ]
     priority_sum = 0
     for row in input_list:
-        rucksacks.append(RUCKSACK(row))
+        rucksacks.append(Rucksack(row))
         priority_sum += rucksacks[-1].priority_both
     return priority_sum
 
@@ -137,9 +137,9 @@ def part_two(input_text=SAMPLE_INPUT):
     groups = [ ]
     total_badge_priority = 0
     for row in input_list:
-        rucksacks.append(RUCKSACK(row))
+        rucksacks.append(Rucksack(row))
         if len(rucksacks) % 3 == 0:
-            groups.append(GROUP(rucksacks[-3:]))
+            groups.append(Group(rucksacks[-3:]))
             total_badge_priority += PRIORITIES.index(groups[-1].carried_by_all[0])
             
     return total_badge_priority

@@ -11,6 +11,8 @@ PUZZLE_TEXT = '''
 SAMPLE_INPUT = '''
 '''
 
+PUZZLE_INPUT = False
+
 P1_SAMPLE_SOLUTION = False
 
 P2_SAMPLE_SOLUTION = False
@@ -33,7 +35,6 @@ def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
     parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
     parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
-    parser.add_argument("-i", "--inputfile", help="Puzzle Input", type=str)
     args = parser.parse_args()
     
     if args.showpuzzle:
@@ -48,15 +49,6 @@ def main():
         print(f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############")
         print(P2_SAMPLE_SOLUTION)
     
-    if args.inputfile:        
-        try:
-            my_input = ""
-            with open(args.inputfile, 'r') as file:
-                while (line := file.readline()):
-                    my_input += line            
-        except FileNotFoundError:
-            print("Specified input file not found.")
-            quit()
 
     if P1_SAMPLE_SOLUTION:            
         print("PART 1\nTesting Sample...\n")
@@ -67,10 +59,10 @@ def main():
         else:
             print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {solution_output}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if args.inputfile:
+        if PUZZLE_INPUT:
             print("Processing Input...\n")
             start_time = time()
-            print(f'SOLUTION: {part_one(my_input)}')
+            print(f'SOLUTION: {part_one(PUZZLE_INPUT)}')
             print(f"Elapsed time {elapsed_time(start_time)}")
         
     if P2_SAMPLE_SOLUTION:
@@ -82,10 +74,10 @@ def main():
         else:
             print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {solution_output}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if args.inputfile:
+        if PUZZLE_INPUT:
             print("Processing Input...\n")
             start_time = time()
-            print(f'SOLUTION: {part_two(my_input)}')
+            print(f'SOLUTION: {part_two(PUZZLE_INPUT)}')
             print(f"Elapsed time {elapsed_time(start_time)}")
     
 if __name__ == "__main__":
