@@ -19,7 +19,7 @@ def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
 
 def part_one(input_text=SAMPLE_INPUT):
-    input_list = input_text.lstrip().rstrip().split('\n')
+    input_list = input_text.strip().split('\n')
     
     return 
 
