@@ -1,7 +1,5 @@
 import argparse
 from time import time
-import json
-import math
 
 DAY = 7
 
@@ -81,6 +79,28 @@ As the outermost directory, / contains every file. Its total size is 48381165, t
 To begin, find all of the directories with a total size of at most 100000, then calculate the sum of their total sizes. In the example above, these directories are a and e; the sum of their total sizes is 95437 (94853 + 584). (As in this example, this process can count files more than once!)
 
 Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
+
+Your puzzle answer was 1454188.
+
+--- Part Two ---
+
+Now, you're ready to choose a directory to delete.
+
+The total disk space available to the filesystem is 70000000. To run the update, you need unused space of at least 30000000. You need to find a directory you can delete that will free up enough space to run the update.
+
+In the example above, the total size of the outermost directory (and thus the total amount of used space) is 48381165; this means that the size of the unused space must currently be 21618835, which isn't quite the 30000000 required by the update. Therefore, the update still requires a directory with total size of at least 8381165 to be deleted before it can run.
+
+To achieve this, you have the following options:
+
+Delete directory e, which would increase unused space by 584.
+Delete directory a, which would increase unused space by 94853.
+Delete directory d, which would increase unused space by 24933642.
+Delete directory /, which would increase unused space by 48381165.
+Directories e and a are both too small; deleting them would not free up enough space. However, directories d and / are both big enough! Between these, choose the smallest: d, increasing unused space by 24933642.
+
+Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What is the total size of that directory?
+
+Your puzzle answer was 4183246.
 '''
 
 SAMPLE_INPUT = '''
@@ -1124,18 +1144,72 @@ $ ls
 
 P1_SAMPLE_SOLUTION = 95437
 
-P2_SAMPLE_SOLUTION = False
+P2_SAMPLE_SOLUTION = 24933642
+
+class Directory():
+    def __init__(self,name,parent=None):
+        self.name = name
+        self.parent = parent
+        self.files = {}
+        self.subdirs = {}
+        self.pwd = None
+        self.size = 0
+
+class File():
+    def __init__(self,name,parent,size=0):
+        self.name = name
+        self.parent = parent
+        self.size = int(size)
 
 class Puzzle():
     def __init__(self,input_text):
         self.input_text = input_text
         self.input_list = input_text.strip().split('\n')
+        self.root = Directory("/")
+        self.directories = []
+        self.files = []
+        self.pwd = self.root
+                
+    def process_terminal_history(self):
+        self.instructions = []
+        
+        for line in [line.split() for line in self.input_list]:
+            if line[0:2] == ["$","cd"]:
+                if line[2] == "/":
+                    self.pwd = self.root
+                elif line[2] == "..":
+                    self.pwd = self.pwd.parent
+                else:
+                    self.pwd = self.pwd.subdirs[line[2]]
+            elif line[0] == "dir":
+                self.pwd.subdirs[line[1]] = Directory(name=line[1],parent=self.pwd)
+                self.directories.append(self.pwd.subdirs[line[1]])
+            elif line[0].isnumeric():
+                self.pwd.files[line[1]] = File(name=line[1],parent=self.pwd,size=int(line[0]))
+                self.files.append(self.pwd.files[line[1]])
+                self.pwd.size += int(line[0])
+                size_updater = self.pwd.parent
+                while size_updater != None:
+                    size_updater.size += int(line[0])
+                    size_updater = size_updater.parent
     
     def p1(self):
-        return
+        self.process_terminal_history()
+        self.p1_solution = 0
+        for directory in self.directories:
+            if directory.size <= 100000:
+                self.p1_solution += directory.size
+        
+        return True
 
     def p2(self):
-        return
+        total_disk_space = 70000000
+        free_disk_space = total_disk_space - self.root.size
+        required_unused_space = 30000000
+        self.p2_solution = min([ directory.size for directory in self.directories if free_disk_space + directory.size >= ( required_unused_space) ])
+        
+        return True
+            
 
 def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
