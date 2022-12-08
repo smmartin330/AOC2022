@@ -2,7 +2,7 @@ import argparse
 from time import time
 import numpy
 
-DAY = 0
+DAY = 8
 
 PUZZLE_TEXT = '''
 --- Day 8: Treetop Tree House ---
