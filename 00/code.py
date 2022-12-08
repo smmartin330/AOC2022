@@ -20,16 +20,16 @@ P2_SAMPLE_SOLUTION = False
 def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
 
-def part_one(input_text=SAMPLE_INPUT):
-    input_list = input_text.strip().split('\n')
-    
-    return 
+class Puzzle():
+    def __init__(self,input_text):
+        self.input_text = input_text
+        self.input_list = input_text.strip().split('\n')
+                
+    def p1(self):
+        return True
 
-def part_two(input_text=SAMPLE_INPUT):
-    input_list = input_text.strip().split('\n')
-        
-    return
-        
+    def p2(self):
+        return True
 
 def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
@@ -53,31 +53,35 @@ def main():
     if P1_SAMPLE_SOLUTION:            
         print("PART 1\nTesting Sample...\n")
         start_time = time()
-        solution_output = part_one()
-        if P1_SAMPLE_SOLUTION == solution_output:
+        sample = Puzzle(input_text=SAMPLE_INPUT)
+        sample.p1()
+        if P1_SAMPLE_SOLUTION == sample.p1_solution:
             print("Sample correct.")
         else:
-            print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {solution_output}")
+            print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {sample.p1_solution}")
         print(f"Elapsed time {elapsed_time(start_time)}")
         if PUZZLE_INPUT:
+            puzzle = Puzzle(input_text=PUZZLE_INPUT)
+            puzzle.p1()
             print("Processing Input...\n")
             start_time = time()
-            print(f'SOLUTION: {part_one(PUZZLE_INPUT)}')
+            print(f'SOLUTION: {puzzle.p1_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
         
     if P2_SAMPLE_SOLUTION:
         print("PART 2\nTesting Sample...\n")
         start_time = time()
-        solution_output = part_two()
-        if P2_SAMPLE_SOLUTION == solution_output:
+        sample.p2()
+        if P2_SAMPLE_SOLUTION == sample.p2_solution:
             print("Sample correct.")
         else:
-            print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {solution_output}")
+            print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}")
         print(f"Elapsed time {elapsed_time(start_time)}")
         if PUZZLE_INPUT:
+            puzzle.p2()
             print("Processing Input...\n")
             start_time = time()
-            print(f'SOLUTION: {part_two(PUZZLE_INPUT)}')
+            print(f'SOLUTION: {puzzle.p2_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
     
 if __name__ == "__main__":
