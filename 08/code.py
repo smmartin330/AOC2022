@@ -1,7 +1,6 @@
 import argparse
 from time import time
-import json
-import math
+import numpy
 
 DAY = 0
 
@@ -35,6 +34,44 @@ In the bottom row, the middle 5 is visible, but the 3 and 4 are not.
 With 16 trees visible on the edge and another 5 visible in the interior, a total of 21 trees are visible in this arrangement.
 
 Consider your map; how many trees are visible from outside the grid?
+
+--- Part Two ---
+
+Content with the amount of tree cover available, the Elves just need to know the best spot to build their tree house: they would like to be able to see a lot of trees.
+
+To measure the viewing distance from a given tree, look up, down, left, and right from that tree; stop if you reach an edge or at the first tree that is the same height or taller than the tree under consideration. (If a tree is right on the edge, at least one of its viewing distances will be zero.)
+
+The Elves don't care about distant trees taller than those found by the rules above; the proposed tree house has large eaves to keep it dry, so they wouldn't be able to see higher than the tree house anyway.
+
+In the example above, consider the middle 5 in the second row:
+
+30373
+25512
+65332
+33549
+35390
+Looking up, its view is not blocked; it can see 1 tree (of height 3).
+Looking left, its view is blocked immediately; it can see only 1 tree (of height 5, right next to it).
+Looking right, its view is not blocked; it can see 2 trees.
+Looking down, its view is blocked eventually; it can see 2 trees (one of height 3, then the tree of height 5 that blocks its view).
+A tree's scenic score is found by multiplying together its viewing distance in each of the four directions. For this tree, this is 4 (found by multiplying 1 * 1 * 2 * 2).
+
+However, you can do even better: consider the tree of height 5 in the middle of the fourth row:
+
+30373
+25512
+65332
+33549
+35390
+Looking up, its view is blocked at 2 trees (by another tree with a height of 5).
+Looking left, its view is not blocked; it can see 2 trees.
+Looking down, its view is also not blocked; it can see 1 tree.
+Looking right, its view is blocked at 2 trees (by a massive tree of height 9).
+This tree's scenic score is 8 (2 * 2 * 1 * 2); this is the ideal spot for the tree house.
+
+Consider each tree on your map. What is the highest scenic score possible for any tree?
+
+
 '''
 
 SAMPLE_INPUT = '''
@@ -149,7 +186,7 @@ PUZZLE_INPUT = '''
 
 P1_SAMPLE_SOLUTION = 21
 
-P2_SAMPLE_SOLUTION = False
+P2_SAMPLE_SOLUTION = 8
 
 def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
@@ -158,12 +195,70 @@ class Puzzle():
     def __init__(self,input_text):
         self.input_text = input_text
         self.input_list = input_text.strip().split('\n')
+        self.trees = []
+        
+        for row in self.input_list:
+            self.trees.append([int(tree) for tree in row])
+        
+        self.height = len(self.trees)
+        self.width = len(self.trees[0])
+        self.treestransposed = numpy.transpose(self.trees).tolist()
+        self.visible = ((len(self.trees)-2)*2) + (len(self.trees[0])*2) 
                 
     def p1(self):
-        return True
+        for y in range(1,self.height-1):
+            for x in range(1,self.width-1):
+                if self.trees[y][x] > max(self.trees[y][0:x]) or self.trees[y][x] > max(self.trees[y][x+1:]):
+                    self.visible += 1
+                elif self.treestransposed[x][y] > max(self.treestransposed[x][0:y]) or self.treestransposed[x][y] > max(self.treestransposed[x][y+1:]):
+                    self.visible += 1      
 
+        self.p1_solution = self.visible
+                
     def p2(self):
-        return True
+        scores = []
+        for y in range(0,self.height):
+            for x in range(0,self.width):
+                score = [0,0,0,0]
+                tree = self.trees[y][x]
+                left = self.trees[y][0:x]
+                left.reverse()
+                right = self.trees[y][x+1:]
+                for checktree in left:
+                    if tree > checktree:
+                        score[0] += 1
+                        continue
+                    else:
+                        score[0] += 1
+                        break
+                for checktree in right:
+                    if tree > checktree:
+                        score[1] += 1
+                        continue
+                    else:
+                        score[1] += 1
+                        break
+                
+                transposeleft = self.treestransposed[x][0:y]
+                transposeleft.reverse()
+                transposeright = self.treestransposed[x][y+1:]
+                for checktree in transposeleft:
+                    if tree > checktree:
+                        score[2] += 1
+                        continue
+                    else:
+                        score[2] += 1
+                        break
+                for checktree in transposeright:
+                    if tree > checktree:
+                        score[3] += 1
+                        continue
+                    else:
+                        score[3] += 1
+                        break
+                scores.append(score[0]*score[1]*score[2]*score[3])
+        self.p2_solution = max(scores)
+
 
 def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
