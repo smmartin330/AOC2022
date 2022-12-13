@@ -105,11 +105,11 @@ class Grid():
         for x in range(0,self.width):
             for y in range(0,self.height):
                 self.every_node.append((x,y))
-                
+
     def pos(self,coordinate):
         x,y = coordinate[0],coordinate[1]
         return self.gridmap[y][x]
-    
+
     def adj(self,coordinate) -> 'dict':
         '''
         returns a dictionary containing the valid cardinal adjacents and their vlaues
@@ -127,7 +127,7 @@ class Grid():
             adj[(x,y+1)] = self.gridmap[y+1][x]
 
         return adj
-    
+
     def adjd(self,coordinate) -> 'dict':
         '''returns a dictionary of all valid adjacents including diagonals, and their value.'''
         x,y = coordinate[1],coordinate[0]
@@ -138,19 +138,18 @@ class Grid():
             for _y in adj_y:
                 if (_x,_y) != (x,y):
                     adjd[(_x,_y)] = self.gridmap[_y][_x]
-        
+
         return adjd
-        
+
 class DjikstraInTheHills():
     def __init__(self,grid) -> None:
         self.grid = Grid(grid)
         self.elevations = [*'.abcdefghijklmnopqrstuvwxyz']
 
-        
     def find_path(self,start_position=None,current_shortest_distance=None):
         self.unvisited = [ node for node in self.grid.every_node ]
         self.unvisited.reverse()
-        
+
         self.distance = {  }
         for node in self.unvisited:
             self.distance[node] = 99999999
@@ -168,17 +167,17 @@ class DjikstraInTheHills():
                 if self.grid.pos(node) == 'E':
                     self.destination = node
         self.distance[self.position] = 0
-        # 3. For the current node, consider all of its unvisited neighbors and calculate their 
-        # tentative distances through the current node. Compare the newly calculated 
-        # tentative distance to the one currently assigned to the neighbor and assign 
-        # it the smaller one. For example, if the current node A is marked with a distance 
-        # of 6, and the edge connecting it with a neighbor B has length 2, then the distance 
-        # to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater 
+        # 3. For the current node, consider all of its unvisited neighbors and calculate their
+        # tentative distances through the current node. Compare the newly calculated
+        # tentative distance to the one currently assigned to the neighbor and assign
+        # it the smaller one. For example, if the current node A is marked with a distance
+        # of 6, and the edge connecting it with a neighbor B has length 2, then the distance
+        # to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater
         # than 8 then change it to 8. Otherwise, the current value will be kept.
         while self.position != self.destination and len(self.unvisited) != 0:
             if current_shortest_distance and self.distance.get(self.position) and current_shortest_distance < self.distance[self.position]:
                 self.unvisited.remove(self.position)
-            
+
                 tentative_distance = 99999999
                 for candidate in self.unvisited:
                     if self.distance[candidate] < tentative_distance:
@@ -186,9 +185,9 @@ class DjikstraInTheHills():
                         next_node = candidate
                     else:
                         self.unvisited.remove(candidate)
-            
+
                 self.position = next_node
-                
+
                 continue
             candidates = self.grid.adj(self.position)
             if self.grid.pos(self.position) == 'S':
@@ -196,7 +195,7 @@ class DjikstraInTheHills():
             else:
                 current_elevation = self.elevations.index(self.grid.pos(self.position))
             next_node = None
-            for position, elevation in candidates.items():                
+            for position, elevation in candidates.items():
                 if elevation == 'S':
                     this_elevation = 1
                 elif elevation == 'E':
@@ -207,113 +206,37 @@ class DjikstraInTheHills():
                     tentative_distance = self.distance[self.position] + 1
                     if self.distance[position] >= tentative_distance:
                         self.distance[position] = tentative_distance
-                    
-            # 4. When we are done considering all of the unvisited neighbors of the current node, 
-            # mark the current node as visited and remove it from the unvisited set. A visited 
-            # node will never be checked again 
-            # 5. If the destination node has been marked visited (when planning a route between two 
+
+            # 4. When we are done considering all of the unvisited neighbors of the current node,
+            # mark the current node as visited and remove it from the unvisited set. A visited
+            # node will never be checked again
+            # 5. If the destination node has been marked visited (when planning a route between two
             # specific nodes) ,then stop. The algorithm has finished.
-            # 6. Otherwise, select the unvisited node that is marked with the smallest tentative 
+            # 6. Otherwise, select the unvisited node that is marked with the smallest tentative
             # distance, set it as the new current node, and go back to step 3.
             self.unvisited.remove(self.position)
-            
+
             tentative_distance = 99999999
             for candidate in self.unvisited:
                 if self.distance[candidate] < tentative_distance:
                     tentative_distance = self.distance[candidate]
                     next_node = candidate
-        
+
             if next_node == None:
-               return False 
-            
+               return False
+
             self.position = next_node
         if self.position == self.destination:
             return self.distance[self.destination]
         else:
             return False
-    
-    def find_reverse_path(self):
-        self.unvisited = [ node for node in self.grid.every_node ]
-        
-        self.distance = {  }
-        for node in self.unvisited:
-            self.distance[node] = 9999999
-            if self.grid.pos(node) == 'E':
-                self.position = node
-        self.distance[self.position] = 0
-        # 3. For the current node, consider all of its unvisited neighbors and calculate their 
-        # tentative distances through the current node. Compare the newly calculated 
-        # tentative distance to the one currently assigned to the neighbor and assign 
-        # it the smaller one. For example, if the current node A is marked with a distance 
-        # of 6, and the edge connecting it with a neighbor B has length 2, then the distance 
-        # to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater 
-        # than 8 then change it to 8. Otherwise, the current value will be kept.
-        while len(self.unvisited) > 0:
-            candidates = self.grid.adj(self.position)
-            if self.grid.pos(self.position) == 'E':
-                current_elevation = 26
-            elif self.grid.pos(self.position) == 'S':
-                current_elevation = 1
-            else:
-                current_elevation = self.elevations.index(self.grid.pos(self.position))
-                if current_elevation == 1:
-                    return self.distance[self.position]
-            for position, elevation in candidates.items():                
-                if elevation == 'S':
-                    this_elevation = 1
-                elif elevation == 'E':
-                    this_elevation = 26
-                else:
-                    this_elevation = self.elevations.index(elevation)
-                if this_elevation in range(current_elevation-1,current_elevation+2) and position in self.unvisited:
-                    tentative_distance = self.distance[self.position] + 1
-                    if self.distance[position] >= tentative_distance:
-                        self.distance[position] = tentative_distance
-                    
-            # 4. When we are done considering all of the unvisited neighbors of the current node, 
-            # mark the current node as visited and remove it from the unvisited set. A visited 
-            # node will never be checked again 
-            self.unvisited.remove(self.position)
 
-            # 5. if the smallest tentative distance among the nodes in the unvisited set is infinity 
-            # (when planning a complete traversal; occurs when there is no connection between the initial 
-            # node and remaining unvisited nodes), then stop. The algorithm has finished.
-            tentative_distance = 9999999
-            remaining = [candidate for candidate in self.unvisited if self.distance[candidate] < tentative_distance]
-            if len(remaining) == 0:
-                smallest = 9999999
-                for k,v in self.distance.items():
-                    if self.grid.pos(k) == 'a':
-                        if v != 9999999:
-                            if v < smallest:
-                                smallest = v
-                return smallest
-
-   
-            # 6. Otherwise, select the unvisited node that is marked with the smallest tentative 
-            # distance, set it as the new current node, and go back to step 3.
-            for candidate in remaining:
-                if self.distance[candidate] < tentative_distance:
-                    tentative_distance = self.distance[candidate]
-                    next_node = candidate
-            
-            self.position = next_node
-            if this_elevation == 1:
-                return tentative_distance-1
- 
-
-            
-            
-            
-            
-    
 class Puzzle():
     def __init__(self,input_text):
         self.input_text = input_text
         self.input_list = input_text.strip().split('\n')
         self.heightmap = [[*row] for row in self.input_list]
-        
-                
+
     def p1(self):
         find_path = DjikstraInTheHills(self.heightmap)
         self.p1_solution = find_path.find_path()
@@ -326,7 +249,7 @@ class Puzzle():
             if result is not False and result < smallest:
                 smallest = result
                 print(f"New Best Path Found: Node {node} - Distance {result}")
-                
+
         self.p2_solution = smallest
 
 def main():
@@ -334,11 +257,11 @@ def main():
     parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
     parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
     args = parser.parse_args()
-    
+
     if args.showpuzzle:
         print(f"###############\nAOC 2022 DAY {DAY} PUZZLE TEXT\n###############")
         print(PUZZLE_TEXT)
-    
+
     if args.showsample:
         print(f"###############\nAOC 2022 DAY {DAY} SAMPLE INPUT\n###############")
         print(SAMPLE_INPUT.strip())
@@ -346,9 +269,9 @@ def main():
         print(P1_SAMPLE_SOLUTION)
         print(f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############")
         print(P2_SAMPLE_SOLUTION)
-    
 
-    if P1_SAMPLE_SOLUTION:            
+
+    if P1_SAMPLE_SOLUTION:
         print("PART 1\nTesting Sample...\n")
         start_time = time()
         sample = Puzzle(input_text=SAMPLE_INPUT)
@@ -365,7 +288,7 @@ def main():
             start_time = time()
             print(f'SOLUTION: {puzzle.p1_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
-        
+
     if P2_SAMPLE_SOLUTION:
         print("PART 2\nTesting Sample...\n")
         start_time = time()
@@ -375,12 +298,12 @@ def main():
         else:
             print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if PUZZLE_INPUT:            
+        if PUZZLE_INPUT:
             print("Processing Input...\n")
             start_time = time()
             puzzle.p2()
             print(f'SOLUTION: {puzzle.p2_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
-    
+
 if __name__ == "__main__":
     main()
