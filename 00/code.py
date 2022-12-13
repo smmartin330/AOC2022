@@ -78,9 +78,9 @@ def main():
             print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}")
         print(f"Elapsed time {elapsed_time(start_time)}")
         if PUZZLE_INPUT:
-            puzzle.p2()
             print("Processing Input...\n")
             start_time = time()
+            puzzle.p2()
             print(f'SOLUTION: {puzzle.p2_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
     

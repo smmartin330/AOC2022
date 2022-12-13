@@ -224,20 +224,20 @@ class DjikstraInTheHills():
                     next_node = candidate
         
             if next_node == None:
-               return 99999999 
+               return False 
             
             self.position = next_node
         if self.position == self.destination:
             return self.distance[self.destination]
         else:
-            return 99999999
+            return False
     
     def find_reverse_path(self):
         self.unvisited = [ node for node in self.grid.every_node ]
         
         self.distance = {  }
         for node in self.unvisited:
-            self.distance[node] = 99999999
+            self.distance[node] = 9999999
             if self.grid.pos(node) == 'E':
                 self.position = node
         self.distance[self.position] = 0
@@ -256,6 +256,8 @@ class DjikstraInTheHills():
                 current_elevation = 1
             else:
                 current_elevation = self.elevations.index(self.grid.pos(self.position))
+                if current_elevation == 1:
+                    return self.distance[self.position]
             for position, elevation in candidates.items():                
                 if elevation == 'S':
                     this_elevation = 1
@@ -272,22 +274,38 @@ class DjikstraInTheHills():
             # mark the current node as visited and remove it from the unvisited set. A visited 
             # node will never be checked again 
             self.unvisited.remove(self.position)
-            
+
             # 5. if the smallest tentative distance among the nodes in the unvisited set is infinity 
             # (when planning a complete traversal; occurs when there is no connection between the initial 
             # node and remaining unvisited nodes), then stop. The algorithm has finished.
-            
-            if len([candidate for candidate in self.unvisited if self.distance[candidate] != 99999999]) == 0:
-                return [ distance[0] for distance in self.distance if self.grid.pos(distance) == 1]
+            tentative_distance = 9999999
+            remaining = [candidate for candidate in self.unvisited if self.distance[candidate] < tentative_distance]
+            if len(remaining) == 0:
+                smallest = 9999999
+                for k,v in self.distance.items():
+                    if self.grid.pos(k) == 'a':
+                        if v != 9999999:
+                            if v < smallest:
+                                smallest = v
+                return smallest
+
+   
             # 6. Otherwise, select the unvisited node that is marked with the smallest tentative 
             # distance, set it as the new current node, and go back to step 3.
-            
-        
-            for candidate in self.unvisited:
-                if self.distance[candidate] > tentative_distance:
+            for candidate in remaining:
+                if self.distance[candidate] < tentative_distance:
                     tentative_distance = self.distance[candidate]
                     next_node = candidate
+            
             self.position = next_node
+            if this_elevation == 1:
+                return tentative_distance-1
+ 
+
+            
+            
+            
+            
     
 class Puzzle():
     def __init__(self,input_text):
@@ -301,8 +319,15 @@ class Puzzle():
         self.p1_solution = find_path.find_path()
 
     def p2(self):
+        smallest = 9999999
         find_path = DjikstraInTheHills(self.heightmap)
-        self.p2_solution = find_path.find_reverse_path()
+        for node in [ node for node in find_path.grid.every_node if find_path.grid.pos(node) in 'Sa']:
+            result = find_path.find_path(start_position=node)
+            if result is not False and result < smallest:
+                smallest = result
+                print(f"New Best Path Found: Node {node} - Distance {result}")
+                
+        self.p2_solution = smallest
 
 def main():
     parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
@@ -350,10 +375,10 @@ def main():
         else:
             print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}")
         print(f"Elapsed time {elapsed_time(start_time)}")
-        if PUZZLE_INPUT:
-            puzzle.p2()
+        if PUZZLE_INPUT:            
             print("Processing Input...\n")
             start_time = time()
+            puzzle.p2()
             print(f'SOLUTION: {puzzle.p2_solution}')
             print(f"Elapsed time {elapsed_time(start_time)}")
     
