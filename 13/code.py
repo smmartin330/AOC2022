@@ -598,41 +598,32 @@ PUZZLE_INPUT = """
 
 P1_SAMPLE_SOLUTION = 13
 
-P2_SAMPLE_SOLUTION = False
+P2_SAMPLE_SOLUTION = 140
 
 
 def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
 
 
+class Pair:
+    def __init__(self, index, pair):
+        self.index = index
+        self.left = eval(pair.split("\n")[0])
+        self.right = eval(pair.split("\n")[1])
+
+
 class Puzzle:
     def __init__(self, input_text):
         self.input_text = input_text
         self.input_list = input_text.strip().split("\n\n")
-        self.packet_pairs = []
-        for group in self.input_list:
-            left = eval(group.split("\n")[0])
-            right = eval(group.split("\n")[1])
-            self.packet_pairs.append([left, right])
+        self.pairs = []
+        self.packets = []
+        for i in range(0, len(self.input_list)):
+            self.pairs.append(Pair(i + 1, self.input_list[i]))
+            self.packets.append(self.input_list[i].split("\n")[0])
+            self.packets.append(self.input_list[i].split("\n")[1])
 
     def compare_values(self, left, right):
-        """
-        If both values are integers, the lower integer should come first. If the left integer
-        is lower than the right integer, the inputs are in the right order. If the left integer
-        is higher than the right integer, the inputs are not in the right order. Otherwise, the
-        inputs are the same integer; continue checking the next part of the input.
-
-        If both values are lists, compare the first value of each list, then the second value,
-        and so on. If the left list runs out of items first, the inputs are in the right order.
-        If the right list runs out of items first, the inputs are not in the right order. If the
-        lists are the same length and no comparison makes a decision about the order, continue
-        checking the next part of the input.
-
-        If exactly one value is an integer, convert the integer to a list which contains that
-        integer as its only value, then retry the comparison. For example, if comparing [0,0,0]
-        and 2, convert the right value to [2] (a list containing 2); the result is then found by
-        instead comparing [0,0,0] and [2].
-        """
         if type(left) == int and type(right) == int:
             if left < right:
                 return True
@@ -640,14 +631,16 @@ class Puzzle:
                 return False
 
         elif type(left) == list and type(right) == list:
-            for i in range(0, len(left)):
+            while len(right) > 0:
+                this_right = right.pop(0)
                 try:
-                    result = self.compare_values(left[i], right[i])
+                    this_left = left.pop(0)
+                    result = self.compare_values(this_left, this_right)
                     if type(result) == bool:
                         return result
-                except IndexError:
-                    return False
-            return True
+                except:
+                    return True
+            return self.compare_values(len(left), len(right))
 
         elif type(left) != type(right):
             if type(left) != list:
@@ -655,40 +648,30 @@ class Puzzle:
             if type(right) != list:
                 right = [right]
             result = self.compare_values(left, right)
-            if type(result) == bool:
-                return result
+            return result
 
         return None
 
-    def in_right_order(self):
-        indices = []
-
-        for i in range(0, len(self.packet_pairs)):
-            result = None
-            pair = self.packet_pairs[i]
-            left, right = pair[0], pair[1]
-            for j in range(0, len(left)):
-                if i in indices or result == False:
-                    result = None
-                    break
-                try:
-                    result = self.compare_values(left[j], right[j])
-                    if result == True:
-                        indices.append(i)
-                        print(f"{left}\n{right}\n")
-                except IndexError:
-                    result = False
-            if type(left) == list and type(right) == list and len(left) == 0:
-                indices.append(i)
-                print(f"{left}\n{right}\n")
-        indices = list(map(lambda x: x + 1, indices))
-        return indices
-
     def p1(self):
-        self.p1_solution = sum(self.in_right_order())
+        self.p1_solution = 0
+        for pair in self.pairs:
+            if self.compare_values(pair.left, pair.right) == True:
+                pair.order = True
+                self.p1_solution += pair.index
 
     def p2(self):
-        return True
+        self.packets.append("[[2]]")
+        self.packets.append("[[6]]")
+        self.clean_packets = [
+            packet.replace("[", "").replace("]", "").replace(",", "").lstrip("0")
+            for packet in self.packets
+        ]
+        self.clean_packets.sort()
+        self.p2_solution = (self.clean_packets.index("2") + 1) * (
+            self.clean_packets.index("6") + 1
+        )
+        for packet in self.clean_packets:
+            print(str(packet))
 
 
 def main():
