@@ -1,6 +1,6 @@
 import argparse
 from time import time
-import numpy
+from copy import deepcopy
 import math
 
 DAY = 13
@@ -144,8 +144,7 @@ SAMPLE_INPUT = """
 [1,[2,[3,[4,[5,6,0]]]],8,9]
 """
 
-PUZZLE_INPUT = """
-[[],[],[[],10,[[7,0,1,1,10],9,6],[1,[4,9,1],6,[4,6,0]],[0,3,0]],[1,[10,[7,4,3,4],[]],[2,2],7,[[10],5,3]]]
+PUZZLE_INPUT = """[[],[],[[],10,[[7,0,1,1,10],9,6],[1,[4,9,1],6,[4,6,0]],[0,3,0]],[1,[10,[7,4,3,4],[]],[2,2],7,[[10],5,3]]]
 [[8,1,[2,3,3,[6,7,7,2,6]],[[8,10,1]],[9]],[1,7,[7,[3,6],7,7,10]]]
 
 [[[[3,0,4,4],9,2],8,[[1],3,[2,0,9,3],[5,3,6,4,5]]],[],[]]
@@ -593,8 +592,7 @@ PUZZLE_INPUT = """
 [[10,[6,10,3,7],[0],3,4]]
 
 [[1,[[5]],[4,1,[]],10,[4,[2,6,5,4,2]]]]
-[[[],5,[],5],[8,3,4,6,7],[1,[]]]
-"""
+[[[],5,[],5],[8,3,4,6,7],[1,[]]]"""
 
 P1_SAMPLE_SOLUTION = 13
 
@@ -612,16 +610,14 @@ class Pair:
         self.right = eval(pair.split("\n")[1])
 
 
+class Packet:
+    def __init__(self, packet):
+        self.packet = eval(packet)
+
+
 class Puzzle:
     def __init__(self, input_text):
         self.input_text = input_text
-        self.input_list = input_text.strip().split("\n\n")
-        self.pairs = []
-        self.packets = []
-        for i in range(0, len(self.input_list)):
-            self.pairs.append(Pair(i + 1, self.input_list[i]))
-            self.packets.append(self.input_list[i].split("\n")[0])
-            self.packets.append(self.input_list[i].split("\n")[1])
 
     def compare_values(self, left, right):
         if type(left) == int and type(right) == int:
@@ -629,19 +625,6 @@ class Puzzle:
                 return True
             elif left > right:
                 return False
-
-        elif type(left) == list and type(right) == list:
-            while len(right) > 0:
-                this_right = right.pop(0)
-                try:
-                    this_left = left.pop(0)
-                    result = self.compare_values(this_left, this_right)
-                    if type(result) == bool:
-                        return result
-                except:
-                    return True
-            return self.compare_values(len(left), len(right))
-
         elif type(left) != type(right):
             if type(left) != list:
                 left = [left]
@@ -649,10 +632,27 @@ class Puzzle:
                 right = [right]
             result = self.compare_values(left, right)
             return result
+        else:
+            maxlen = max(len(left), len(right))
+            for i in range(0, maxlen):
+                if i >= len(left):
+                    return True
+                if i >= len(right):
+                    return False
+                inner_left = left[i]
+                inner_right = right[i]
+                result = self.compare_values(inner_left, inner_right)
+                if type(result) == bool:
+                    return result
+            return self.compare_values(len(left), len(right))
 
         return None
 
     def p1(self):
+        self.input_list = self.input_text.strip().split("\n\n")
+        self.pairs = []
+        for i in range(0, len(self.input_list)):
+            self.pairs.append(Pair(i + 1, self.input_list[i]))
         self.p1_solution = 0
         for pair in self.pairs:
             if self.compare_values(pair.left, pair.right) == True:
@@ -660,18 +660,24 @@ class Puzzle:
                 self.p1_solution += pair.index
 
     def p2(self):
-        self.packets.append("[[2]]")
-        self.packets.append("[[6]]")
-        self.clean_packets = [
-            packet.replace("[", "").replace("]", "").replace(",", "").lstrip("0")
-            for packet in self.packets
-        ]
-        self.clean_packets.sort()
-        self.p2_solution = (self.clean_packets.index("2") + 1) * (
-            self.clean_packets.index("6") + 1
-        )
-        for packet in self.clean_packets:
-            print(str(packet))
+        self.input_list = self.input_text.strip().split("\n\n")
+        self.pairs = []
+        for i in range(0, len(self.input_list)):
+            self.pairs.append(Pair(i + 1, self.input_list[i]))
+        self.two_index = 1
+        self.six_index = 2
+        for pair in self.pairs:
+            left = pair.left
+            right = pair.right
+            if self.compare_values(left, 2) == True:
+                self.two_index += 1
+            if self.compare_values(right, 2) == True:
+                self.two_index += 1
+            if self.compare_values(left, 6) == True:
+                self.six_index += 1
+            if self.compare_values(right, 6) == True:
+                self.six_index += 1
+        self.p2_solution = self.two_index * self.six_index
 
 
 def main():
