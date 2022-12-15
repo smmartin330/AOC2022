@@ -3,7 +3,7 @@ from time import time
 import json
 import numpy
 
-DAY = 0
+DAY = 14
 
 PUZZLE_TEXT = """
 --- Day 14: Regolith Reservoir ---

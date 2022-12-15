@@ -2,9 +2,9 @@ import argparse
 from time import time
 import numpy
 
-DAY = 0
+DAY = 12
 
-PUZZLE_TEXT = '''
+PUZZLE_TEXT = """
 --- Day 12: Hill Climbing Algorithm ---
 
 You try contacting the Elves using your handheld device, but the river you're following must be too low to get a decent signal.
@@ -34,17 +34,17 @@ In the above diagram, the symbols indicate whether the path exits each square mo
 This path reaches the goal in 31 steps, the fewest possible.
 
 What is the fewest steps required to move from your current position to the location that should get the best signal?
-'''
+"""
 
-SAMPLE_INPUT = '''
+SAMPLE_INPUT = """
 Sabqponm
 abcryxxl
 accszExk
 acctuvwj
 abdefghi
-'''
+"""
 
-PUZZLE_INPUT = '''
+PUZZLE_INPUT = """
 abccccaaacaccccaaaaacccccccaaccccccccaaaaaaccccccaaaaaccccccccccaaaaaaaaacccccccaaaaaaaaaaaaaaccaaaaaccccccccccccaccacccccccccccccccccccccccccccccccccccccccaaaaaa
 abccaacaaaaaccaaaaacccccaaaaaccccccccaaaaaaccccccaaaaaacccccccccaaaaaaaaaaaaacccaaaaaaaaaaaaaaaaaaaaaccccccccccccaaaacccccccccccccccccccccccccccccccccccccccaaaaaa
 abccaaaaaaaaccaaaaaacccccaaaaaccccccaaaaaaaacccccaaaaaaccccccccccaaaaaaaaaaaacccaaaaaacaaaaaacaaaaaaaaccccccccccaaaaacccccaccccccccccccccccccaaacccccccccccccaaaaa
@@ -86,71 +86,74 @@ abccccccccccccccccccccccccccccccccccccccccaaaaaaacccccccccaaaaaaccaaaaaaaacacccc
 abcccccccccccccccccccccccccccccccccccccccccaaaaaaccccccccaaaaaaaaccaaaaaaaccccccccaaaaaaaaaaaacccccccccccccccccccccccccccaaaaaacccccccccccccaaaccccccccccccccccaaa
 abccccccccccccccccccccccccccccccccccccccaaaaaaaaccccaaaccaaaaaaaacaaaaaaaaaacccccccaaaaaaaccaacccccccccccccccccccccccccccccaacccccccccccccccaaaccccccccccccccaaaaa
 abccccccccccccccccccccccccccccccccccccccaaaaaaaaacccaaaaccccaaccaaaaaaaaaaaaaccccaaaaaaaaaacccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccaaaaaa
-'''
+"""
 
 P1_SAMPLE_SOLUTION = 31
 
 P2_SAMPLE_SOLUTION = 29
 
+
 def elapsed_time(start_time):
     return f"{round(time() - start_time, 8)}s\n"
 
-class Grid():
-    def __init__(self,gridmap) -> None:
+
+class Grid:
+    def __init__(self, gridmap) -> None:
         self.gridmap = gridmap
         self.gridmap_t = numpy.transpose(self.gridmap).tolist()
         self.height = len(self.gridmap)
         self.width = len(self.gridmap_t)
         self.every_node = []
-        for x in range(0,self.width):
-            for y in range(0,self.height):
-                self.every_node.append((x,y))
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                self.every_node.append((x, y))
 
-    def pos(self,coordinate):
-        x,y = coordinate[0],coordinate[1]
+    def pos(self, coordinate):
+        x, y = coordinate[0], coordinate[1]
         return self.gridmap[y][x]
 
-    def adj(self,coordinate) -> 'dict':
-        '''
+    def adj(self, coordinate) -> "dict":
+        """
         returns a dictionary containing the valid cardinal adjacents and their vlaues
-        '''
-        x,y = coordinate[0],coordinate[1]
+        """
+        x, y = coordinate[0], coordinate[1]
         adj = dict()
 
         if x > 0:
-            adj[(x-1,y)] = self.gridmap[y][x-1]
-        if x < self.width-1:
-            adj[(x+1,y)] = self.gridmap[y][x+1]
+            adj[(x - 1, y)] = self.gridmap[y][x - 1]
+        if x < self.width - 1:
+            adj[(x + 1, y)] = self.gridmap[y][x + 1]
         if y > 0:
-            adj[(x,y-1)] = self.gridmap[y-1][x]
-        if y < self.height-1:
-            adj[(x,y+1)] = self.gridmap[y+1][x]
+            adj[(x, y - 1)] = self.gridmap[y - 1][x]
+        if y < self.height - 1:
+            adj[(x, y + 1)] = self.gridmap[y + 1][x]
 
         return adj
 
-    def adjd(self,coordinate) -> 'dict':
-        '''returns a dictionary of all valid adjacents including diagonals, and their value.'''
-        x,y = coordinate[1],coordinate[0]
+    def adjd(self, coordinate) -> "dict":
+        """returns a dictionary of all valid adjacents including diagonals, and their value."""
+        x, y = coordinate[1], coordinate[0]
         adjd = dict()
-        adj_x = list(range(max(0,x-1),min(self.width,x+2)))
-        adj_y = list(range(max(0,y-1),min(self.height,y+2)))
+        adj_x = list(range(max(0, x - 1), min(self.width, x + 2)))
+        adj_y = list(range(max(0, y - 1), min(self.height, y + 2)))
         for _x in adj_x:
             for _y in adj_y:
-                if (_x,_y) != (x,y):
-                    adjd[(_x,_y)] = self.gridmap[_y][_x]
+                if (_x, _y) != (x, y):
+                    adjd[(_x, _y)] = self.gridmap[_y][_x]
 
         return adjd
 
-class DjikstraInTheHills():
-    def __init__(self,grid) -> None:
-        self.grid = Grid(grid)
-        self.elevations = [*'.abcdefghijklmnopqrstuvwxyz']
 
-    def find_path(self,start_position=None,current_shortest_distance=None):
-        self.unvisited = [ node for node in self.grid.every_node ]
+class DjikstraInTheHills:
+    def __init__(self, grid) -> None:
+        self.grid = Grid(grid)
+        self.elevations = [*".abcdefghijklmnopqrstuvwxyz"]
+
+    def find_path(self, start_position=None, current_shortest_distance=None):
+        self.unvisited = [node for node in self.grid.every_node]
         self.unvisited.reverse()
 
-        self.distance = {  }
+        self.distance = {}
         for node in self.unvisited:
             self.distance[node] = 99999999
         if start_position:
@@ -158,13 +161,13 @@ class DjikstraInTheHills():
             self.destination = None
             while not self.destination:
                 for node in self.unvisited:
-                    if self.grid.pos(node) == 'E':
+                    if self.grid.pos(node) == "E":
                         self.destination = node
         else:
             for node in self.unvisited:
-                if self.grid.pos(node) == 'S':
-                        self.position = node
-                if self.grid.pos(node) == 'E':
+                if self.grid.pos(node) == "S":
+                    self.position = node
+                if self.grid.pos(node) == "E":
                     self.destination = node
         self.distance[self.position] = 0
         # 3. For the current node, consider all of its unvisited neighbors and calculate their
@@ -175,7 +178,11 @@ class DjikstraInTheHills():
         # to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater
         # than 8 then change it to 8. Otherwise, the current value will be kept.
         while self.position != self.destination and len(self.unvisited) != 0:
-            if current_shortest_distance and self.distance.get(self.position) and current_shortest_distance < self.distance[self.position]:
+            if (
+                current_shortest_distance
+                and self.distance.get(self.position)
+                and current_shortest_distance < self.distance[self.position]
+            ):
                 self.unvisited.remove(self.position)
 
                 tentative_distance = 99999999
@@ -190,19 +197,22 @@ class DjikstraInTheHills():
 
                 continue
             candidates = self.grid.adj(self.position)
-            if self.grid.pos(self.position) == 'S':
+            if self.grid.pos(self.position) == "S":
                 current_elevation = 1
             else:
                 current_elevation = self.elevations.index(self.grid.pos(self.position))
             next_node = None
             for position, elevation in candidates.items():
-                if elevation == 'S':
+                if elevation == "S":
                     this_elevation = 1
-                elif elevation == 'E':
+                elif elevation == "E":
                     this_elevation = 26
                 else:
                     this_elevation = self.elevations.index(elevation)
-                if this_elevation in range(0,current_elevation+2) and position in self.unvisited:
+                if (
+                    this_elevation in range(0, current_elevation + 2)
+                    and position in self.unvisited
+                ):
                     tentative_distance = self.distance[self.position] + 1
                     if self.distance[position] >= tentative_distance:
                         self.distance[position] = tentative_distance
@@ -223,7 +233,7 @@ class DjikstraInTheHills():
                     next_node = candidate
 
             if next_node == None:
-               return False
+                return False
 
             self.position = next_node
         if self.position == self.destination:
@@ -231,10 +241,11 @@ class DjikstraInTheHills():
         else:
             return False
 
-class Puzzle():
-    def __init__(self,input_text):
+
+class Puzzle:
+    def __init__(self, input_text):
         self.input_text = input_text
-        self.input_list = input_text.strip().split('\n')
+        self.input_list = input_text.strip().split("\n")
         self.heightmap = [[*row] for row in self.input_list]
 
     def p1(self):
@@ -244,7 +255,11 @@ class Puzzle():
     def p2(self):
         smallest = 9999999
         find_path = DjikstraInTheHills(self.heightmap)
-        for node in [ node for node in find_path.grid.every_node if find_path.grid.pos(node) in 'Sa']:
+        for node in [
+            node
+            for node in find_path.grid.every_node
+            if find_path.grid.pos(node) in "Sa"
+        ]:
             result = find_path.find_path(start_position=node)
             if result is not False and result < smallest:
                 smallest = result
@@ -252,10 +267,15 @@ class Puzzle():
 
         self.p2_solution = smallest
 
+
 def main():
-    parser = argparse.ArgumentParser(description=f'AOC2022 Puzzle Day { DAY }')
-    parser.add_argument("-p", "--showpuzzle", help="Display Puzzle Text", action='store_true')
-    parser.add_argument("-s", "--showsample", help="Display Sample Input", action='store_true')
+    parser = argparse.ArgumentParser(description=f"AOC2022 Puzzle Day { DAY }")
+    parser.add_argument(
+        "-p", "--showpuzzle", help="Display Puzzle Text", action="store_true"
+    )
+    parser.add_argument(
+        "-s", "--showsample", help="Display Sample Input", action="store_true"
+    )
     args = parser.parse_args()
 
     if args.showpuzzle:
@@ -265,11 +285,14 @@ def main():
     if args.showsample:
         print(f"###############\nAOC 2022 DAY {DAY} SAMPLE INPUT\n###############")
         print(SAMPLE_INPUT.strip())
-        print(f"\n###############\nAOC 2022 DAY {DAY} P1 SAMPLE SOLUTION\n###############")
+        print(
+            f"\n###############\nAOC 2022 DAY {DAY} P1 SAMPLE SOLUTION\n###############"
+        )
         print(P1_SAMPLE_SOLUTION)
-        print(f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############")
+        print(
+            f"\n###############\nAOC 2022 DAY {DAY} P2 SAMPLE SOLUTION\n###############"
+        )
         print(P2_SAMPLE_SOLUTION)
-
 
     if P1_SAMPLE_SOLUTION:
         print("PART 1\nTesting Sample...\n")
@@ -279,14 +302,16 @@ def main():
         if P1_SAMPLE_SOLUTION == sample.p1_solution:
             print("Sample correct.")
         else:
-            print(f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {sample.p1_solution}")
+            print(
+                f"Sample failed; Expected {P1_SAMPLE_SOLUTION}, got {sample.p1_solution}"
+            )
         print(f"Elapsed time {elapsed_time(start_time)}")
         if PUZZLE_INPUT:
             puzzle = Puzzle(input_text=PUZZLE_INPUT)
             puzzle.p1()
             print("Processing Input...\n")
             start_time = time()
-            print(f'SOLUTION: {puzzle.p1_solution}')
+            print(f"SOLUTION: {puzzle.p1_solution}")
             print(f"Elapsed time {elapsed_time(start_time)}")
 
     if P2_SAMPLE_SOLUTION:
@@ -296,14 +321,17 @@ def main():
         if P2_SAMPLE_SOLUTION == sample.p2_solution:
             print("Sample correct.")
         else:
-            print(f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}")
+            print(
+                f"Sample failed; Expected {P2_SAMPLE_SOLUTION}, got {sample.p2_solution}"
+            )
         print(f"Elapsed time {elapsed_time(start_time)}")
         if PUZZLE_INPUT:
             print("Processing Input...\n")
             start_time = time()
             puzzle.p2()
-            print(f'SOLUTION: {puzzle.p2_solution}')
+            print(f"SOLUTION: {puzzle.p2_solution}")
             print(f"Elapsed time {elapsed_time(start_time)}")
+
 
 if __name__ == "__main__":
     main()
